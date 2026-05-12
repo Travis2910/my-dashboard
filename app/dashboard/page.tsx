@@ -7,6 +7,7 @@ import {
   LineChart, Line, Legend,
 } from 'recharts';
 import type { OrderRecord } from '@/lib/google-sheets';
+import { useSession, signOut } from 'next-auth/react';
 
 // ── Constants ──────────────────────────────────────────────
 const PRIMARY = '#166534';
@@ -771,6 +772,7 @@ function DimContent({ data, param, dimKey, dimLabel }: {
 // MAIN DASHBOARD PAGE
 // ══════════════════════════════════════════════════════════════
 export default function DashboardPage() {
+  const { data: session } = useSession();
   const [records, setRecords] = useState<OrderRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -912,7 +914,29 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col overflow-hidden" style={{ minWidth: 0 }}>
         <header className="flex items-center justify-between px-6 py-3 bg-white border-b border-[#e2e8f0]">
           <h2 className="text-xl font-bold text-[#111827]">{pageTitle}</h2>
-          <span className="text-xs text-[#6b7280]">Last updated: {lastUpdated}</span>
+          <div className="flex items-center gap-6">
+            <span className="text-xs text-[#6b7280]">Last updated: {lastUpdated}</span>
+            {session?.user && (
+              <div className="flex items-center gap-3 pl-6 border-l border-[#e2e8f0]">
+                <div className="flex items-center gap-2">
+                  {session.user.image ? (
+                    <img src={session.user.image} alt="Avatar" className="w-8 h-8 rounded-full border border-gray-200" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-[#166534] text-white flex items-center justify-center text-sm font-bold">
+                      {session.user.name?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-[#111827]">{session.user.name}</span>
+                </div>
+                <button
+                  onClick={() => signOut()}
+                  className="px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                >
+                  Đăng xuất
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
         <div className="flex items-center gap-1 px-6 py-2 bg-white border-b border-[#e2e8f0]">
